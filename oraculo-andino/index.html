@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Oráculo Andino — Lectura de Cartas</title>
+  <style>
+    :root {
+      --fondo: #120c0a;
+      --fondo-suave: #1c1410;
+      --cochinilla: #9b1b2e;
+      --cochinilla-clara: #c43a4a;
+      --ocre: #c4a35a;
+      --ocre-suave: #e0c888;
+      --turquesa: #2a8a8a;
+      --turquesa-clara: #3eb5b0;
+      --hueso: #f2ebe0;
+      --hueso-tenue: #cfc4b4;
+      --sombra: rgba(0, 0, 0, 0.55);
+      --carta-w: 160px;
+      --carta-h: 250px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+      color: var(--hueso);
+      background:
+        radial-gradient(ellipse at 20% 0%, rgba(154, 27, 46, 0.18), transparent 45%),
+        radial-gradient(ellipse at 90% 20%, rgba(42, 138, 138, 0.12), transparent 40%),
+        radial-gradient(ellipse at 50% 100%, rgba(196, 163, 90, 0.1), transparent 50%),
+        var(--fondo);
+      line-height: 1.5;
+    }
+
+    /* Textil de fondo sutil */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.045;
+      background-image:
+        linear-gradient(90deg, var(--ocre) 1px, transparent 1px),
+        linear-gradient(var(--ocre) 1px, transparent 1px);
+      background-size: 24px 24px;
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 1.5rem 1.1rem 2.5rem;
+    }
+
+    /* ——— Encabezado ——— */
+    header {
+      text-align: center;
+      margin-bottom: 1.75rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 2px solid var(--ocre);
+      position: relative;
+    }
+
+    header::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -6px;
+      transform: translateX(-50%);
+      width: 48px;
+      height: 8px;
+      background:
+        linear-gradient(90deg,
+          transparent 0 8px, var(--cochinilla) 8px 16px,
+          transparent 16px 24px, var(--turquesa) 24px 32px,
+          transparent 32px 40px, var(--ocre) 40px 48px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .brand svg {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.7rem, 5vw, 2.4rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--ocre-suave);
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      color: var(--hueso-tenue);
+      font-size: 0.98rem;
+      max-width: 34rem;
+      margin: 0.35rem auto 0;
+    }
+
+    /* ——— Panel de consulta ——— */
+    .panel {
+      background: var(--fondo-suave);
+      border: 2px solid var(--ocre);
+      clip-path: polygon(
+        0 12px, 12px 12px, 12px 0,
+        calc(100% - 12px) 0, calc(100% - 12px) 12px, 100% 12px,
+        100% calc(100% - 12px), calc(100% - 12px) calc(100% - 12px), calc(100% - 12px) 100%,
+        12px 100%, 12px calc(100% - 12px), 0 calc(100% - 12px)
+      );
+      padding: 1.35rem 1.2rem 1.5rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .panel-inner {
+      border: 1px solid rgba(196, 163, 90, 0.35);
+      padding: 1.1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--turquesa-clara);
+      margin-bottom: 0.45rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 88px;
+      resize: vertical;
+      background: #0d0908;
+      border: 2px solid rgba(196, 163, 90, 0.45);
+      color: var(--hueso);
+      font: inherit;
+      font-size: 1.05rem;
+      padding: 0.75rem 0.85rem;
+      margin-bottom: 1.15rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus {
+      border-color: var(--turquesa);
+    }
+
+    textarea::placeholder {
+      color: rgba(242, 235, 224, 0.4);
+    }
+
+    .tiradas {
+      display: grid;
+      gap: 0.65rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .tirada-opt {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      cursor: pointer;
+      padding: 0.7rem 0.8rem;
+      border: 2px solid rgba(196, 163, 90, 0.3);
+      background: rgba(0, 0, 0, 0.25);
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .tirada-opt:hover {
+      border-color: var(--turquesa);
+    }
+
+    .tirada-opt:has(input:checked) {
+      border-color: var(--cochinilla-clara);
+      background: rgba(155, 27, 46, 0.18);
+    }
+
+    .tirada-opt input {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+      border: 2px solid var(--ocre);
+      background: transparent;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .tirada-opt input:checked::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      background: var(--cochinilla-clara);
+    }
+
+    .tirada-opt strong {
+      display: block;
+      color: var(--ocre-suave);
+      font-size: 1rem;
+    }
+
+    .tirada-opt span {
+      display: block;
+      font-size: 0.88rem;
+      color: var(--hueso-tenue);
+      margin-top: 0.15rem;
+    }
+
+    .acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+    }
+
+    button {
+      font: inherit;
+      font-size: 0.92rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: 2px solid var(--ocre);
+      background: transparent;
+      color: var(--hueso);
+      padding: 0.7rem 1.15rem;
+      clip-path: polygon(
+        0 8px, 8px 8px, 8px 0,
+        calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px,
+        100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+        8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px)
+      );
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--cochinilla);
+      border-color: var(--cochinilla-clara);
+      color: var(--hueso);
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    button.primario {
+      background: var(--cochinilla);
+      border-color: var(--cochinilla-clara);
+    }
+
+    button.primario:hover:not(:disabled) {
+      background: var(--cochinilla-clara);
+    }
+
+    button.secundario {
+      border-color: var(--turquesa);
+      color: var(--turquesa-clara);
+    }
+
+    button.secundario:hover:not(:disabled) {
+      background: var(--turquesa);
+      border-color: var(--turquesa-clara);
+      color: var(--hueso);
+    }
+
+    /* ——— Zona de lectura ——— */
+    .lectura {
+      min-height: 120px;
+      margin-bottom: 1.5rem;
+    }
+
+    .lectura-msg {
+      text-align: center;
+      color: var(--hueso-tenue);
+      padding: 2rem 1rem;
+      border: 1px dashed rgba(196, 163, 90, 0.35);
+    }
+
+    .pregunta-activa {
+      text-align: center;
+      margin-bottom: 1.25rem;
+      font-style: italic;
+      color: var(--ocre-suave);
+      font-size: 1.05rem;
+    }
+
+    .nombre-tirada {
+      text-align: center;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      color: var(--turquesa-clara);
+      margin-bottom: 1.1rem;
+    }
+
+    /* Layouts de cartas */
+    .mesa {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.25rem 1rem;
+      perspective: 1200px;
+    }
+
+    .mesa.tres-mundos {
+      gap: 1.5rem 1.1rem;
+    }
+
+    .mesa.chakana {
+      display: grid;
+      grid-template-columns: var(--carta-w) var(--carta-w) var(--carta-w);
+      grid-template-rows: auto auto auto;
+      gap: 0.85rem 0.75rem;
+      justify-content: center;
+      width: max-content;
+      max-width: 100%;
+      margin: 0 auto;
+    }
+
+    .mesa.chakana .slot:nth-child(1) { grid-column: 2; grid-row: 1; }
+    .mesa.chakana .slot:nth-child(2) { grid-column: 1; grid-row: 2; }
+    .mesa.chakana .slot:nth-child(3) { grid-column: 2; grid-row: 2; }
+    .mesa.chakana .slot:nth-child(4) { grid-column: 3; grid-row: 2; }
+    .mesa.chakana .slot:nth-child(5) { grid-column: 2; grid-row: 3; }
+
+    .slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .posicion {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ocre);
+      text-align: center;
+      max-width: var(--carta-w);
+      min-height: 2.2em;
+    }
+
+    /* Carta 3D */
+    .carta {
+      width: var(--carta-w);
+      height: var(--carta-h);
+      position: relative;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.75s cubic-bezier(0.4, 0.1, 0.2, 1);
+      animation: barajar-entrada 0.55s ease both;
+    }
+
+    .carta:nth-child(1),
+    .slot:nth-child(1) .carta { animation-delay: 0.05s; }
+    .slot:nth-child(2) .carta { animation-delay: 0.12s; }
+    .slot:nth-child(3) .carta { animation-delay: 0.19s; }
+    .slot:nth-child(4) .carta { animation-delay: 0.26s; }
+    .slot:nth-child(5) .carta { animation-delay: 0.33s; }
+
+    @keyframes barajar-entrada {
+      from {
+        opacity: 0;
+        transform: translateY(28px) rotateY(-18deg) scale(0.92);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) rotateY(0) scale(1);
+      }
+    }
+
+    .carta.revelada {
+      animation: none;
+      transform: rotateY(180deg);
+    }
+
+    .cara {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      overflow: hidden;
+      clip-path: polygon(
+        0 10px, 10px 10px, 10px 0,
+        calc(100% - 10px) 0, calc(100% - 10px) 10px, 100% 10px,
+        100% calc(100% - 10px), calc(100% - 10px) calc(100% - 10px), calc(100% - 10px) 100%,
+        10px 100%, 10px calc(100% - 10px), 0 calc(100% - 10px)
+      );
+      box-shadow: 0 10px 28px var(--sombra);
+    }
+
+    .cara-reverso {
+      background: #1a100c;
+      border: 3px solid var(--cochinilla);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+    }
+
+    .cara-reverso svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .cara-frente {
+      background: linear-gradient(165deg, #2a1c14 0%, #18100c 55%, #221610 100%);
+      border: 3px solid var(--ocre);
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.65rem 0.5rem 0.55rem;
+      text-align: center;
+    }
+
+    .simbolo {
+      width: 72px;
+      height: 72px;
+      margin: 0.15rem 0 0.35rem;
+      color: var(--turquesa-clara);
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .carta.invertida .simbolo {
+      transform: rotate(180deg);
+    }
+
+    .simbolo svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .num-carta {
+      font-size: 0.68rem;
+      color: var(--ocre);
+      letter-spacing: 0.08em;
+    }
+
+    .carta.invertida .num-carta {
+      color: var(--cochinilla-clara);
+    }
+
+    .nombre-qh {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--ocre-suave);
+      line-height: 1.15;
+      margin-top: 0.1rem;
+    }
+
+    .traduccion {
+      font-size: 0.72rem;
+      color: var(--hueso-tenue);
+      margin-top: 0.15rem;
+      line-height: 1.2;
+    }
+
+    .badge-inv {
+      margin-top: auto;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cochinilla-clara);
+      border: 1px solid var(--cochinilla);
+      padding: 0.15rem 0.4rem;
+      visibility: hidden;
+    }
+
+    .carta.invertida .badge-inv {
+      visibility: visible;
+    }
+
+    /* Detalle de significado */
+    .detalle {
+      margin-top: 1.5rem;
+      background: rgba(28, 20, 16, 0.92);
+      border: 2px solid var(--turquesa);
+      clip-path: polygon(
+        0 12px, 12px 12px, 12px 0,
+        calc(100% - 12px) 0, calc(100% - 12px) 12px, 100% 12px,
+        100% calc(100% - 12px), calc(100% - 12px) calc(100% - 12px), calc(100% - 12px) 100%,
+        12px 100%, 12px calc(100% - 12px), 0 calc(100% - 12px)
+      );
+      padding: 1.2rem 1.15rem;
+      display: none;
+      animation: aparecer 0.35s ease;
+    }
+
+    .detalle.visible {
+      display: block;
+    }
+
+    @keyframes aparecer {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .detalle h2 {
+      font-size: 1.35rem;
+      color: var(--ocre-suave);
+      margin-bottom: 0.15rem;
+    }
+
+    .detalle .meta {
+      color: var(--hueso-tenue);
+      font-size: 0.92rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .claves {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .clave {
+      font-size: 0.75rem;
+      letter-spacing: 0.04em;
+      color: var(--fondo);
+      background: var(--turquesa);
+      padding: 0.2rem 0.55rem;
+    }
+
+    .orientacion {
+      display: inline-block;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.65rem;
+      padding: 0.2rem 0.55rem;
+      border: 1px solid var(--ocre);
+      color: var(--ocre-suave);
+    }
+
+    .orientacion.inv {
+      border-color: var(--cochinilla-clara);
+      color: var(--cochinilla-clara);
+    }
+
+    .significado {
+      color: var(--hueso);
+      font-size: 1rem;
+    }
+
+    .pos-detalle {
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--turquesa-clara);
+      margin-bottom: 0.35rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 2rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid rgba(196, 163, 90, 0.35);
+      font-size: 0.8rem;
+      color: var(--hueso-tenue);
+      max-width: 36rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    @media (max-width: 560px) {
+      :root {
+        --carta-w: 118px;
+        --carta-h: 190px;
+      }
+
+      .wrap {
+        padding: 1rem 0.75rem 2rem;
+      }
+
+      .simbolo {
+        width: 52px;
+        height: 52px;
+      }
+
+      .nombre-qh {
+        font-size: 0.8rem;
+      }
+
+      .traduccion {
+        font-size: 0.62rem;
+      }
+
+      .mesa.chakana {
+        gap: 0.55rem 0.45rem;
+      }
+
+      .mesa.tres-mundos {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      button {
+        flex: 1 1 auto;
+        text-align: center;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .carta,
+      .detalle,
+      button {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <path d="M8 24h8v-8h8V8h8v8h8v8h-8v8h-8v8h-8v-8H8V24z" stroke="#c4a35a" stroke-width="2"/>
+          <rect x="20" y="20" width="8" height="8" fill="#9b1b2e"/>
+        </svg>
+        <h1>Oráculo Andino</h1>
+      </div>
+      <p class="subtitle">
+        Lectura de cartas de inspiración andina. Nombres en quechua con su sentido en español.
+      </p>
+    </header>
+
+    <section class="panel" aria-label="Consulta">
+      <div class="panel-inner">
+        <label for="pregunta">Tu pregunta</label>
+        <textarea
+          id="pregunta"
+          placeholder="Escribe aquí lo que deseas consultar…"
+          maxlength="500"
+        ></textarea>
+
+        <label>Elige la tirada</label>
+        <div class="tiradas" role="radiogroup" aria-label="Tipo de tirada">
+          <label class="tirada-opt">
+            <input type="radio" name="tirada" value="1" checked />
+            <div>
+              <strong>Carta del día</strong>
+              <span>Una carta — orientación para el presente</span>
+            </div>
+          </label>
+          <label class="tirada-opt">
+            <input type="radio" name="tirada" value="3" />
+            <div>
+              <strong>Los tres mundos</strong>
+              <span>Uku Pacha · Kay Pacha · Hanan Pacha</span>
+            </div>
+          </label>
+          <label class="tirada-opt">
+            <input type="radio" name="tirada" value="5" />
+            <div>
+              <strong>Chakana</strong>
+              <span>Cruz andina: cuatro brazos y un centro</span>
+            </div>
+          </label>
+        </div>
+
+        <div class="acciones">
+          <button type="button" class="primario" id="btn-barajar">Barajar</button>
+          <button type="button" id="btn-nueva" disabled>Nueva lectura</button>
+          <button type="button" class="secundario" id="btn-guardar" disabled>Guardar lectura</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="lectura" id="lectura" aria-live="polite">
+      <p class="lectura-msg">Escribe tu pregunta, elige una tirada y pulsa <strong>Barajar</strong>.</p>
+    </section>
+
+    <aside class="detalle" id="detalle" aria-live="polite"></aside>
+
+    <footer>
+      Oráculo de inspiración andina, con fines de orientación y entretenimiento. No sustituye asesoría profesional.
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      /* ——— 22 cartas ——— */
+      const CARTAS = [
+        {
+          id: 0,
+          nombre: "Chaski",
+          traduccion: "el mensajero",
+          claves: ["noticia", "llamado", "movimiento"],
+          derecho: "Llega un mensaje, una invitación o una señal que no debes ignorar. Abre los caminos de comunicación y actúa con prontitud.",
+          invertido: "Retrasos en las noticias o palabras malinterpretadas. Revisa a quién escuchas y no tomes decisiones con información incompleta."
+        },
+        {
+          id: 1,
+          nombre: "Paqo",
+          traduccion: "el oficiante",
+          claves: ["ritual", "intención", "sanación"],
+          derecho: "Es momento de honrar lo sagrado en lo cotidiano. Una ofrenda, una palabra de gratitud o un acto consciente restablece el equilibrio.",
+          invertido: "Rituales vacíos o promesas incumplidas. Recupera la sinceridad de tu intención antes de pedir o de ofrecer."
+        },
+        {
+          id: 2,
+          nombre: "Killa",
+          traduccion: "la luna",
+          claves: ["ciclos", "intuición", "emoción"],
+          derecho: "Confía en tus ciclos internos. La intuición ilumina lo que la razón aún no nombra; honra el descanso y la receptividad.",
+          invertido: "Confusión emocional o miedo a lo invisible. No niegues lo que sientes; dale forma con calma antes de actuar."
+        },
+        {
+          id: 3,
+          nombre: "Pachamama",
+          traduccion: "la madre tierra",
+          claves: ["sostén", "abundancia", "cuidado"],
+          derecho: "La tierra responde: hay nutrición, hogar y fecundidad. Cuida lo que te sostiene y cultiva con paciencia lo que deseas cosechar.",
+          invertido: "Descuido del cuerpo, del hogar o de la tierra. Restaura el cuidado mutuo antes de exigir más frutos."
+        },
+        {
+          id: 4,
+          nombre: "Sapa Inka",
+          traduccion: "la autoridad",
+          claves: ["liderazgo", "orden", "responsabilidad"],
+          derecho: "Asume el mando con dignidad. Tu palabra tiene peso: organiza, decide y protege lo que te ha sido confiado.",
+          invertido: "Autoritarismo o falta de dirección. El poder mal usado o abandonado genera desorden; recupera el equilibrio entre mando y servicio."
+        },
+        {
+          id: 5,
+          nombre: "Amauta",
+          traduccion: "el maestro",
+          claves: ["sabiduría", "enseñanza", "consejo"],
+          derecho: "Aparece un maestro —o tú lo eres para otro—. Escucha con humildad y transmite lo aprendido sin vanidad.",
+          invertido: "Orgullo intelectual o rechazo al aprendizaje. Baja la defensa y permite que la experiencia te corrija."
+        },
+        {
+          id: 6,
+          nombre: "Yanantin",
+          traduccion: "la dualidad complementaria",
+          claves: ["pareja", "equilibrio", "complemento"],
+          derecho: "Dos fuerzas distintas se encuentran y se potencian. Busca la alianza, no la copia: la diferencia es tu riqueza.",
+          invertido: "Polarización o dependencia. Cuando un polo domina al otro, el tejido se rompe; restablece el diálogo."
+        },
+        {
+          id: 7,
+          nombre: "Qhapaq Ñan",
+          traduccion: "el gran camino",
+          claves: ["viaje", "destino", "conexión"],
+          derecho: "El camino se abre. Un viaje físico o interior te conecta con otros y con tu propósito; da el siguiente paso con fe.",
+          invertido: "Desvío, estancamiento o miedo a partir. Reorienta la brújula: no todo camino largo es el correcto."
+        },
+        {
+          id: 8,
+          nombre: "Puma",
+          traduccion: "la fuerza serena",
+          claves: ["poder", "silencio", "precisión"],
+          derecho: "La fuerza verdadera no grita. Actúa con precisión, observa antes de saltar y protege tu territorio interior.",
+          invertido: "Agresión impulsiva o debilidad disfrazada. Domina el impulso; la potencia sin mesura se vuelve amenaza."
+        },
+        {
+          id: 9,
+          nombre: "Apu",
+          traduccion: "el espíritu de la montaña",
+          claves: ["protección", "altura", "visión"],
+          derecho: "Un guardián te observa desde lo alto. Eleva la mirada, pide amparo a lo estable y confía en la perspectiva amplia.",
+          invertido: "Aislamiento o soberbia de la cima. Bajar un poco no es derrota: es reencontrar el camino con los demás."
+        },
+        {
+          id: 10,
+          nombre: "Pachakuti",
+          traduccion: "el vuelco del tiempo",
+          claves: ["cambio", "ciclo", "renacimiento"],
+          derecho: "Un ciclo se invierte: lo viejo cae para que nazca lo nuevo. Acepta el vuelco; la crisis es también umbral.",
+          invertido: "Resistencia al cambio o caos sin sentido. Si te aferras a lo que ya terminó, el vuelco te encuentra desprevenido."
+        },
+        {
+          id: 11,
+          nombre: "Ayni",
+          traduccion: "la reciprocidad",
+          claves: ["dar", "recibir", "comunidad"],
+          derecho: "Hoy por ti, mañana por mí. Ofrece y recibe en equilibrio; la red comunitaria es tu verdadero tesoro.",
+          invertido: "Deuda emocional o egoísmo. Restaura el flujo: da sin calcular o recibe sin culpa."
+        },
+        {
+          id: 12,
+          nombre: "Uku Pacha",
+          traduccion: "el mundo interior",
+          claves: ["profundidad", "raíces", "inconsciente"],
+          derecho: "Desciende con respeto. En lo oculto hay semillas, memorias y verdades que sostienen tu vida en la superficie.",
+          invertido: "Evitar lo profundo o perderse en la sombra. No escapes de ti: ilumina con cuidado lo que habita abajo."
+        },
+        {
+          id: 13,
+          nombre: "Mallki",
+          traduccion: "el ancestro y la semilla",
+          claves: ["linaje", "origen", "legado"],
+          derecho: "Los ancestros caminan contigo. Honra tus raíces y siembra para quienes vendrán; eres puente entre tiempos.",
+          invertido: "Corte con el origen o repetición ciega del pasado. Reconecta con lo que te da vida, no con lo que te ata."
+        },
+        {
+          id: 14,
+          nombre: "Mama Qocha",
+          traduccion: "la madre agua",
+          claves: ["emoción", "flujo", "purificación"],
+          derecho: "El agua limpia y fertiliza. Deja fluir lo sentido, limpia lo estancado y nutre lo que necesita suavidad.",
+          invertido: "Emociones desbordadas o sequía del alma. Encuentra el cauce: ni represes todo ni te dejes arrastrar."
+        },
+        {
+          id: 15,
+          nombre: "Supay",
+          traduccion: "la sombra",
+          claves: ["miedo", "tentación", "umbral"],
+          derecho: "La sombra enseña. Enfrenta lo que evitas: hay poder en nombrar el miedo y cruzar el umbral con lucidez.",
+          invertido: "Negación de la sombra o dominio de ella. Si niegas lo oscuro, te controla; si te identificas con él, te pierde."
+        },
+        {
+          id: 16,
+          nombre: "Illapa",
+          traduccion: "el rayo",
+          claves: ["revelación", "ruptura", "energía"],
+          derecho: "Un destello rompe el cielo. Llega la claridad súbita, la verdad que corta y la energía para actuar ya.",
+          invertido: "Choque destructivo o parálisis ante lo intenso. Canaliza la descarga; no la temas ni la uses para herir."
+        },
+        {
+          id: 17,
+          nombre: "Chaska",
+          traduccion: "la estrella",
+          claves: ["guía", "esperanza", "destino"],
+          derecho: "Hay una luz que orienta en la noche. Sigue tu estrella —un ideal, un talento, una promesa— sin perder el suelo.",
+          invertido: "Ilusiones o desorientación. Distingue la estrella verdadera del brillo engañoso; reajusta el rumbo."
+        },
+        {
+          id: 18,
+          nombre: "Amaru",
+          traduccion: "la serpiente",
+          claves: ["transformación", "sabiduría", "renovación"],
+          derecho: "Mudas la piel. La transformación es sagrada: suelta lo viejo, integra la sabiduría y renace más entero.",
+          invertido: "Miedo a cambiar o transformación forzada. No te apresures a mudar ni te aferres a una piel ya estrecha."
+        },
+        {
+          id: 19,
+          nombre: "Inti",
+          traduccion: "el sol",
+          claves: ["vitalidad", "claridad", "éxito"],
+          derecho: "El sol ilumina y calienta. Es tiempo de visibilidad, alegría y acción plena; deja que tu luz se vea.",
+          invertido: "Arrogancia o agotamiento. Demasiado sol quema: modera el ego y descansa para volver a brillar."
+        },
+        {
+          id: 20,
+          nombre: "Kuntur",
+          traduccion: "el cóndor",
+          claves: ["libertad", "visión", "espíritu"],
+          derecho: "El cóndor ve desde arriba. Eleva el espíritu, libera lo que te ata y contempla el panorama completo.",
+          invertido: "Desconexión de lo terreno o libertad malentendida. Vuela, pero no olvides dónde anidas."
+        },
+        {
+          id: 21,
+          nombre: "Chakana",
+          traduccion: "la cruz andina",
+          claves: ["equilibrio", "puente", "orden cósmico"],
+          derecho: "Los mundos se alinean. Encuentras el centro que une cielo, tierra y profundidad; actúa desde ese eje.",
+          invertido: "Desequilibrio entre planos de la vida. Recompón la cruz: trabajo, espíritu, emoción y acción deben dialogar."
+        }
+      ];
+
+      /* ——— Símbolos SVG lineales ——— */
+      const SIMBOLOS = {
+        0: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M12 40l8-20h8l4 10 4-10h8l8 20"/><path d="M20 40v8h24v-8"/><circle cx="32" cy="14" r="4"/><path d="M32 18v6"/></svg>`,
+        1: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M32 8v12"/><path d="M24 20h16l4 8H20l4-8z"/><path d="M22 28v20h20V28"/><path d="M28 48v8h8v-8"/><path d="M26 36h12"/></svg>`,
+        2: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="34" cy="30" r="14"/><path d="M22 22a12 12 0 0 0 0 20" stroke-width="2.5"/><circle cx="38" cy="24" r="2" fill="currentColor" stroke="none"/></svg>`,
+        3: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M8 48h48"/><path d="M14 48c4-16 10-28 18-36 8 8 14 20 18 36"/><path d="M24 48c2-10 5-18 8-24 3 6 6 14 8 24"/><circle cx="32" cy="22" r="3"/></svg>`,
+        4: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M16 52V28l16-16 16 16v24"/><path d="M24 52V36h16v16"/><path d="M28 20h8"/><path d="M32 12v4"/><path d="M22 28h20"/></svg>`,
+        5: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><circle cx="32" cy="18" r="8"/><path d="M20 56v-8c0-8 5-14 12-14h0c7 0 12 6 12 14v8"/><path d="M18 28h6M40 28h6"/><path d="M32 26v6"/></svg>`,
+        6: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="22" cy="32" r="12"/><circle cx="42" cy="32" r="12"/><path d="M22 32h20" stroke-dasharray="3 3"/></svg>`,
+        7: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M8 48h12l8-20 8 12 8-24 12 32"/><path d="M10 40h8M28 36h6M44 28h8"/><circle cx="52" cy="16" r="3"/></svg>`,
+        8: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 40c4-2 8-10 14-12 2-6 8-10 14-8 4 0 8 2 10 6 4 2 8 8 8 14H10z"/><path d="M18 40v8M28 40v10M38 40v8M46 40v6"/><path d="M48 26c4-2 8-2 10 2"/><circle cx="42" cy="30" r="1.5" fill="currentColor"/></svg>`,
+        9: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M8 52L32 12l24 40H8z"/><path d="M20 52l12-20 12 20"/><path d="M32 12v8"/><circle cx="32" cy="28" r="3"/></svg>`,
+        10: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M12 20h40v8H20v8h32v8H12V20z"/><path d="M32 12v8M32 44v8"/><path d="M28 12h8M28 52h8"/></svg>`,
+        11: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M16 28c0-8 6-14 16-14s16 6 16 14c0 10-16 22-16 22S16 38 16 28z"/><path d="M24 32h16M32 24v16"/></svg>`,
+        12: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M12 16h40v8H20v8h32v8H20v8h32v8H12V16z"/><circle cx="32" cy="48" r="3" fill="currentColor" stroke="none"/></svg>`,
+        13: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M32 56V28"/><path d="M32 40c-8-4-12-12-12-20 0 0 8 4 12 4s12-4 12-4c0 8-4 16-12 20z"/><circle cx="32" cy="20" r="4"/><path d="M20 56h24"/></svg>`,
+        14: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 28c8 8 16-8 24 0s16-8 24 0"/><path d="M8 40c8 8 16-8 24 0s16-8 24 0"/><path d="M8 52c8 8 16-8 24 0s16-8 24 0"/><path d="M32 12v10"/></svg>`,
+        15: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M20 12h24v16c0 12-8 20-12 24-4-4-12-12-12-24V12z"/><path d="M26 24h12M28 32h8"/><path d="M24 52h16"/></svg>`,
+        16: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M36 8L20 32h12L24 56l24-32H36L44 8z"/></svg>`,
+        17: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="32" cy="32" r="6"/><path d="M32 10v10M32 44v10M10 32h10M44 32h10M16 16l7 7M41 41l7 7M48 16l-7 7M23 41l-7 7"/></svg>`,
+        18: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 44c8-16 12-8 20-20 6-8 14-8 18 0 4 10-2 18-10 18-10 0-12-12-4-16 6-3 12 2 10 8"/><circle cx="48" cy="28" r="2" fill="currentColor"/></svg>`,
+        19: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2"><circle cx="32" cy="32" r="10"/><path d="M32 8v8M32 48v8M8 32h8M48 32h8M14 14l6 6M44 44l6 6M50 14l-6 6M20 44l-6 6" stroke-linecap="square"/></svg>`,
+        20: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 36c12-4 20-16 24-24 4 8 12 20 24 24"/><path d="M32 12v28"/><path d="M24 40c2 6 6 10 8 12 2-2 6-6 8-12"/><path d="M20 36h24"/></svg>`,
+        21: `<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><path d="M24 8h16v8h8v16h8v16h-8v8H24v-8h-8V32h-8V16h8V8z"/><rect x="28" y="28" width="8" height="8" fill="currentColor" stroke="none"/></svg>`
+      };
+
+      const REVERSO_SVG = `
+        <svg viewBox="0 0 100 160" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="100" height="160" fill="#1a100c"/>
+          <g fill="none" stroke="#9b1b2e" stroke-width="1.2">
+            <path d="M10 10h80v140H10z"/>
+            <path d="M16 16h68v128H16z" stroke="#c4a35a" stroke-width="0.8"/>
+          </g>
+          <g fill="#2a8a8a" opacity="0.9">
+            <path d="M28 30h8v8h-8zM44 30h8v8h-8zM60 30h8v8h-8z"/>
+            <path d="M36 38h8v8h-8zM52 38h8v8h-8z"/>
+            <path d="M28 46h8v8h-8zM44 46h8v8h-8zM60 46h8v8h-8z"/>
+          </g>
+          <g fill="#c4a35a">
+            <path d="M36 64h28v4H36z"/>
+            <path d="M32 68h8v8h-8zM44 68h12v8H44zM60 68h8v8h-8z"/>
+            <path d="M36 76h8v8h-8zM52 76h8v8h-8z"/>
+            <path d="M32 84h36v4H32z"/>
+          </g>
+          <g fill="#9b1b2e">
+            <path d="M42 96h16v16H42z"/>
+            <path d="M34 100h8v8h-8zM58 100h8v8h-8z"/>
+            <path d="M42 112h4v8h-4zM54 112h4v8h-4z"/>
+          </g>
+          <g fill="#2a8a8a" opacity="0.9">
+            <path d="M28 128h8v8h-8zM44 128h8v8h-8zM60 128h8v8h-8z"/>
+            <path d="M36 136h8v8h-8zM52 136h8v8h-8z"/>
+          </g>
+          <g fill="none" stroke="#c4a35a" stroke-width="1">
+            <path d="M22 22h8v4h-4v4h-4zM78 22h-8v4h4v4h4zM22 138h8v-4h-4v-4h-4zM78 138h-8v-4h4v-4h4z"/>
+          </g>
+        </svg>
+      `;
+
+      const TIRADAS = {
+        1: {
+          nombre: "Carta del día",
+          posiciones: ["Orientación del presente"]
+        },
+        3: {
+          nombre: "Los tres mundos",
+          posiciones: [
+            "Uku Pacha — mundo interior / raíces",
+            "Kay Pacha — mundo de aquí / presente",
+            "Hanan Pacha — mundo de arriba / espíritu"
+          ]
+        },
+        5: {
+          nombre: "Chakana",
+          posiciones: [
+            "Brazo superior — visión y aspiración",
+            "Brazo izquierdo — pasado y origen",
+            "Centro — el eje / tu pregunta",
+            "Brazo derecho — futuro y acción",
+            "Brazo inferior — fundamento y cuerpo"
+          ]
+        }
+      };
+
+      let lecturaActual = null;
+
+      const elPregunta = document.getElementById("pregunta");
+      const elLectura = document.getElementById("lectura");
+      const elDetalle = document.getElementById("detalle");
+      const btnBarajar = document.getElementById("btn-barajar");
+      const btnNueva = document.getElementById("btn-nueva");
+      const btnGuardar = document.getElementById("btn-guardar");
+
+      function barajarArray(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          const t = a[i];
+          a[i] = a[j];
+          a[j] = t;
+        }
+        return a;
+      }
+
+      function tiradaSeleccionada() {
+        const r = document.querySelector('input[name="tirada"]:checked');
+        return Number(r ? r.value : 1);
+      }
+
+      function barajar() {
+        const pregunta = elPregunta.value.trim();
+        if (!pregunta) {
+          elPregunta.focus();
+          elPregunta.style.borderColor = "#c43a4a";
+          setTimeout(() => { elPregunta.style.borderColor = ""; }, 1200);
+          return;
+        }
+
+        const n = tiradaSeleccionada();
+        const info = TIRADAS[n];
+        const mazo = barajarArray(CARTAS);
+        const sacadas = mazo.slice(0, n).map((carta, i) => ({
+          carta,
+          invertida: Math.random() < 0.5,
+          posicion: info.posiciones[i],
+          revelada: false
+        }));
+
+        lecturaActual = {
+          pregunta,
+          tirada: n,
+          nombreTirada: info.nombre,
+          cartas: sacadas,
+          fecha: new Date()
+        };
+
+        renderMesa();
+        elDetalle.classList.remove("visible");
+        elDetalle.innerHTML = "";
+        btnNueva.disabled = false;
+        btnGuardar.disabled = false;
+        btnBarajar.disabled = true;
+        elPregunta.disabled = true;
+        document.querySelectorAll('input[name="tirada"]').forEach((inp) => {
+          inp.disabled = true;
+        });
+      }
+
+      function renderMesa() {
+        const L = lecturaActual;
+        const claseMesa =
+          L.tirada === 3 ? "mesa tres-mundos" :
+          L.tirada === 5 ? "mesa chakana" : "mesa";
+
+        let html = "";
+        html += `<p class="pregunta-activa">«${escapar(L.pregunta)}»</p>`;
+        html += `<p class="nombre-tirada">${escapar(L.nombreTirada)}</p>`;
+        html += `<div class="${claseMesa}">`;
+
+        L.cartas.forEach((item, index) => {
+          const c = item.carta;
+          const clases = [
+            "carta",
+            item.revelada ? "revelada" : "",
+            item.invertida ? "invertida" : ""
+          ].filter(Boolean).join(" ");
+
+          html += `<div class="slot">`;
+          html += `<div class="posicion">${escapar(item.posicion)}</div>`;
+          html += `<div class="${clases}" data-index="${index}" role="button" tabindex="0" aria-label="Carta ${index + 1}: ${item.revelada ? c.nombre : "boca abajo"}">`;
+          html += `<div class="cara cara-reverso">${REVERSO_SVG}</div>`;
+          html += `<div class="cara cara-frente">`;
+          html += `<span class="num-carta">${c.id}</span>`;
+          html += `<div class="simbolo">${SIMBOLOS[c.id]}</div>`;
+          html += `<div class="texto-carta">`;
+          html += `<div class="nombre-qh">${escapar(c.nombre)}</div>`;
+          html += `<div class="traduccion">${escapar(c.traduccion)}</div>`;
+          html += `</div>`;
+          html += `<span class="badge-inv">Invertida</span>`;
+          html += `</div></div></div>`;
+        });
+
+        html += `</div>`;
+        elLectura.innerHTML = html;
+
+        elLectura.querySelectorAll(".carta").forEach((nodo) => {
+          nodo.addEventListener("click", () => revelar(Number(nodo.dataset.index)));
+          nodo.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              revelar(Number(nodo.dataset.index));
+            }
+          });
+        });
+      }
+
+      function revelar(index) {
+        if (!lecturaActual) return;
+        const item = lecturaActual.cartas[index];
+        if (!item.revelada) {
+          item.revelada = true;
+          const nodo = elLectura.querySelector(`.carta[data-index="${index}"]`);
+          if (nodo) {
+            nodo.classList.add("revelada");
+            nodo.setAttribute(
+              "aria-label",
+              `Carta ${index + 1}: ${item.carta.nombre}${item.invertida ? " (invertida)" : ""}`
+            );
+          }
+        }
+        mostrarDetalle(index);
+      }
+
+      function mostrarDetalle(index) {
+        const item = lecturaActual.cartas[index];
+        const c = item.carta;
+        const significado = item.invertida ? c.invertido : c.derecho;
+
+        elDetalle.innerHTML = `
+          <p class="pos-detalle">${escapar(item.posicion)}</p>
+          <h2>${c.id}. ${escapar(c.nombre)}</h2>
+          <p class="meta">${escapar(c.traduccion)}</p>
+          <div class="claves">${c.claves.map((k) => `<span class="clave">${escapar(k)}</span>`).join("")}</div>
+          <span class="orientacion ${item.invertida ? "inv" : ""}">${item.invertida ? "Invertida" : "Al derecho"}</span>
+          <p class="significado">${escapar(significado)}</p>
+        `;
+        elDetalle.classList.add("visible");
+        elDetalle.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+
+      function nuevaLectura() {
+        lecturaActual = null;
+        elLectura.innerHTML = `<p class="lectura-msg">Escribe tu pregunta, elige una tirada y pulsa <strong>Barajar</strong>.</p>`;
+        elDetalle.classList.remove("visible");
+        elDetalle.innerHTML = "";
+        btnNueva.disabled = true;
+        btnGuardar.disabled = true;
+        btnBarajar.disabled = false;
+        elPregunta.disabled = false;
+        elPregunta.value = "";
+        document.querySelectorAll('input[name="tirada"]').forEach((inp) => {
+          inp.disabled = false;
+        });
+        elPregunta.focus();
+      }
+
+      function guardarLectura() {
+        if (!lecturaActual) return;
+        const L = lecturaActual;
+        const fecha = L.fecha.toLocaleString("es-ES", {
+          dateStyle: "long",
+          timeStyle: "short"
+        });
+
+        let texto = "ORÁCULO ANDINO — Lectura guardada\n";
+        texto += "================================\n\n";
+        texto += "Fecha: " + fecha + "\n";
+        texto += "Tirada: " + L.nombreTirada + "\n";
+        texto += "Pregunta: " + L.pregunta + "\n\n";
+
+        L.cartas.forEach((item, i) => {
+          const c = item.carta;
+          const orient = item.invertida ? "Invertida" : "Al derecho";
+          const sig = item.invertida ? c.invertido : c.derecho;
+          texto += "--- Carta " + (i + 1) + " ---\n";
+          texto += "Posición: " + item.posicion + "\n";
+          texto += c.id + ". " + c.nombre + " (" + c.traduccion + ")\n";
+          texto += "Orientación: " + orient + "\n";
+          texto += "Claves: " + c.claves.join(", ") + "\n";
+          if (item.revelada) {
+            texto += "Significado: " + sig + "\n";
+          } else {
+            texto += "Significado: (carta aún no revelada)\n";
+          }
+          texto += "\n";
+        });
+
+        texto += "--------------------------------\n";
+        texto += "Oráculo de inspiración andina, con fines de orientación y entretenimiento.\n";
+        texto += "No sustituye asesoría profesional.\n";
+
+        const blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const stamp = L.fecha.toISOString().slice(0, 10);
+        a.href = url;
+        a.download = "lectura-oraculo-andino-" + stamp + ".txt";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function escapar(str) {
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      btnBarajar.addEventListener("click", barajar);
+      btnNueva.addEventListener("click", nuevaLectura);
+      btnGuardar.addEventListener("click", guardarLectura);
+    })();
+  </script>
+</body>
+</html>
