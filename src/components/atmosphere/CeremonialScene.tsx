@@ -2,10 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const PUBLIC_BASE = import.meta.env.BASE_URL
-const AUSANGATE_SRC = `${PUBLIC_BASE}images/ausangate-noche.webp`
+const ASSET_VERSION = '20260812'
+const AUSANGATE_SRC = `${PUBLIC_BASE}images/ausangate-noche.webp?v=${ASSET_VERSION}`
 const PAQO_VIDEO_WEBM = `${PUBLIC_BASE}media/paqo-ceremonia.webm`
 const PAQO_VIDEO_MP4 = `${PUBLIC_BASE}media/paqo-ceremonia.mp4`
-const PAQO_IMAGE_SRC = `${PUBLIC_BASE}images/paqo-pututo.webp`
+const PAQO_IMAGE_SRC = `${PUBLIC_BASE}images/paqo-pututo.webp?v=${ASSET_VERSION}`
 const PUTUTU_AUDIO_SRC = `${PUBLIC_BASE}audio/pututo.mp3`
 
 /**
