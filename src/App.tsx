@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { HashRouter, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/layout/AppLayout'
 import { DiaryProvider } from './context/DiaryContext'
 import { HomePage } from './pages/HomePage'
@@ -11,7 +11,7 @@ import { AboutPage } from './pages/AboutPage'
 export default function App() {
   return (
     <DiaryProvider>
-      <BrowserRouter>
+      <HashRouter>
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<HomePage />} />
@@ -23,7 +23,7 @@ export default function App() {
             <Route path="*" element={<HomePage />} />
           </Route>
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </DiaryProvider>
   )
 }
