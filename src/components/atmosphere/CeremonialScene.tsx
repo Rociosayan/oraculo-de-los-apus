@@ -61,21 +61,19 @@ const CONSTELLATIONS: {
     ],
   },
   {
-    name: 'kuntur',
+    name: 'cruz-del-sur',
     points: [
-      [0.72, 0.16],
-      [0.78, 0.12],
-      [0.84, 0.16],
-      [0.66, 0.22],
-      [0.9, 0.22],
-      [0.78, 0.19],
+      [0.82, 0.09],
+      [0.8, 0.16],
+      [0.77, 0.27],
+      [0.71, 0.17],
+      [0.89, 0.2],
     ],
     lines: [
       [0, 1],
       [1, 2],
-      [0, 3],
-      [2, 4],
-      [1, 5],
+      [3, 1],
+      [1, 4],
     ],
   },
   {
@@ -274,11 +272,40 @@ export function CeremonialScene({ className = '' }: { className?: string }) {
         ctx.fill()
       }
 
+      // Venus: estrella guía, más luminosa y cálida que el resto del firmamento.
+      const venusX = width * 0.12
+      const venusY = height * 0.12
+      const venusPulse = 0.88 + 0.12 * Math.sin(now / 850)
+      const venusGlow = ctx.createRadialGradient(venusX, venusY, 0, venusX, venusY, 25)
+      venusGlow.addColorStop(0, `rgba(255, 249, 220, ${venusPulse})`)
+      venusGlow.addColorStop(0.18, 'rgba(245, 208, 128, 0.75)')
+      venusGlow.addColorStop(1, 'rgba(245, 208, 128, 0)')
+      ctx.globalAlpha = 1
+      ctx.fillStyle = venusGlow
+      ctx.beginPath()
+      ctx.arc(venusX, venusY, 25, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.strokeStyle = 'rgba(255, 235, 180, 0.78)'
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(venusX - 13, venusY)
+      ctx.lineTo(venusX + 13, venusY)
+      ctx.moveTo(venusX, venusY - 13)
+      ctx.lineTo(venusX, venusY + 13)
+      ctx.stroke()
+      ctx.fillStyle = '#fff8df'
+      ctx.beginPath()
+      ctx.arc(venusX, venusY, 2.8, 0, Math.PI * 2)
+      ctx.fill()
+
       // constelaciones andinas
       ctx.globalAlpha = 1
       for (const c of CONSTELLATIONS) {
-        ctx.strokeStyle = 'rgba(103, 232, 249, 0.14)'
-        ctx.lineWidth = 0.8
+        const isSouthernCross = c.name === 'cruz-del-sur'
+        ctx.strokeStyle = isSouthernCross
+          ? 'rgba(203, 230, 255, 0.32)'
+          : 'rgba(103, 232, 249, 0.14)'
+        ctx.lineWidth = isSouthernCross ? 1.1 : 0.8
         for (const [a, b] of c.lines) {
           ctx.beginPath()
           ctx.moveTo(c.points[a][0] * width, c.points[a][1] * height)
@@ -288,9 +315,9 @@ export function CeremonialScene({ className = '' }: { className?: string }) {
         c.points.forEach(([px, py], i) => {
           const tw = 0.6 + 0.4 * Math.sin(now / 1100 + i * 1.7)
           ctx.globalAlpha = tw
-          ctx.fillStyle = '#cbe6ff'
+          ctx.fillStyle = isSouthernCross ? '#f4f7ff' : '#cbe6ff'
           ctx.beginPath()
-          ctx.arc(px * width, py * height, 1.4, 0, Math.PI * 2)
+          ctx.arc(px * width, py * height, isSouthernCross ? 2 : 1.4, 0, Math.PI * 2)
           ctx.fill()
         })
         ctx.globalAlpha = 1
