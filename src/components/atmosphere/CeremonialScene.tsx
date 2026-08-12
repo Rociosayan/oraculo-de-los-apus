@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 
-const AUSANGATE_SRC = '/images/ausangate-noche.webp'
-const PAQO_VIDEO_WEBM = '/media/paqo-ceremonia.webm'
-const PAQO_VIDEO_MP4 = '/media/paqo-ceremonia.mp4'
-const PAQO_IMAGE_SRC = '/images/paqo-pututo.webp'
-const PUTUTU_AUDIO_SRC = '/audio/pututo.mp3'
+const PUBLIC_BASE = import.meta.env.BASE_URL
+const AUSANGATE_SRC = `${PUBLIC_BASE}images/ausangate-noche.webp`
+const PAQO_VIDEO_WEBM = `${PUBLIC_BASE}media/paqo-ceremonia.webm`
+const PAQO_VIDEO_MP4 = `${PUBLIC_BASE}media/paqo-ceremonia.mp4`
+const PAQO_IMAGE_SRC = `${PUBLIC_BASE}images/paqo-pututo.webp`
+const PUTUTU_AUDIO_SRC = `${PUBLIC_BASE}audio/pututo.mp3`
 
 /**
  * Sincronización con el video ceremonial (8-10 s):
@@ -407,12 +408,6 @@ export function CeremonialScene({ className = '' }: { className?: string }) {
     []
   )
 
-  const missingFiles = [
-    ...(webmMissing ? ['/public/media/paqo-ceremonia.webm'] : []),
-    ...(mp4Missing ? ['/public/media/paqo-ceremonia.mp4'] : []),
-    ...(audioMissing ? ['/public/audio/pututo.mp3'] : []),
-  ]
-
   return (
     <>
       {/* Atenuación general de la página durante el llamado */}
@@ -581,12 +576,6 @@ export function CeremonialScene({ className = '' }: { className?: string }) {
           <SpeakerIcon muted={!soundOn} />
         </button>
 
-        {/* Marcadores discretos de archivos multimedia pendientes */}
-        {missingFiles.length > 0 && (
-          <p className="absolute bottom-1.5 left-3 z-30 max-w-[70%] text-[9px] leading-snug text-mist/35">
-            Pendiente: {missingFiles.join(' · ')}
-          </p>
-        )}
       </div>
     </>
   )

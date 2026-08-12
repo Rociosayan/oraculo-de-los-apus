@@ -113,14 +113,7 @@ export function TarotCard({
                 className="absolute inset-0 h-full w-full select-none object-cover"
               />
             ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-2 p-3 text-center">
-                <p className="text-[9px] leading-snug text-mist/60">
-                  Ilustración pendiente
-                </p>
-                <p className="break-all text-[8px] text-mist/40">
-                  /images/cartas/reverso.webp
-                </p>
-              </div>
+              <div className="h-full bg-gradient-to-br from-indigo-night via-electric/20 to-night" />
             )}
             <div className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-cyan-soft/15" />
           </div>

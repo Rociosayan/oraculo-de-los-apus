@@ -29,7 +29,7 @@ export const CARD_IMAGE_SLUGS: Record<number, string> = {
 
 export function cardImageSrc(id: number): string {
   const slug = CARD_IMAGE_SLUGS[id]
-  return `/images/cartas/${String(id).padStart(2, '0')}-${slug}.webp`
+  return `${import.meta.env.BASE_URL}images/cartas/${String(id).padStart(2, '0')}-${slug}.webp`
 }
 
-export const CARD_BACK_SRC = '/images/cartas/reverso.webp'
+export const CARD_BACK_SRC = `${import.meta.env.BASE_URL}images/cartas/reverso.webp`
