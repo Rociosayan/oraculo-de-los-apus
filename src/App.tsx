@@ -7,9 +7,12 @@ import { ReadingSessionPage } from './pages/ReadingSessionPage'
 import { CardsPage } from './pages/CardsPage'
 import { DiaryPage } from './pages/DiaryPage'
 import { AboutPage } from './pages/AboutPage'
+import { ShopPage } from './pages/ShopPage'
+import { LanguageProvider } from './context/LanguageContext'
 
 export default function App() {
   return (
+    <LanguageProvider>
     <DiaryProvider>
       <HashRouter>
         <Routes>
@@ -18,6 +21,7 @@ export default function App() {
             <Route path="lecturas" element={<ReadingsPage />} />
             <Route path="lecturas/:spreadId" element={<ReadingSessionPage />} />
             <Route path="cartas" element={<CardsPage />} />
+            <Route path="tienda" element={<ShopPage />} />
             <Route path="diario" element={<DiaryPage />} />
             <Route path="acerca" element={<AboutPage />} />
             <Route path="*" element={<HomePage />} />
@@ -25,5 +29,6 @@ export default function App() {
         </Routes>
       </HashRouter>
     </DiaryProvider>
+    </LanguageProvider>
   )
 }
