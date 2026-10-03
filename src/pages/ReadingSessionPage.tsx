@@ -8,6 +8,10 @@ import { generarLectura } from '../lib/interpretacion'
 import { LIMITE_PREGUNTA, requiereTiradaAccion } from '../lib/questionAnalysis'
 import { downloadText, formatReadingAsText, shareReading } from '../lib/diary'
 import { useDiary } from '../hooks/useDiary'
+import { useLanguage } from '../context/LanguageContext'
+import { useCopy } from '../content/translations'
+import { localizeSpread, positionLabel } from '../content/spreadsCopy'
+import { localizeVisibleNarrative } from '../lib/localizeReading'
 import { TarotCard } from '../components/cards/TarotCard'
 import { NarrativePanel } from '../components/reading/NarrativePanel'
 import { CardDetail } from '../components/reading/CardDetail'
@@ -30,6 +34,8 @@ export function ReadingSessionPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const spread = getSpreadById(spreadId)
+  const { language } = useLanguage()
+  const t = useCopy(language)
   const { saveReading } = useDiary()
 
   const initialQuestion = (location.state as { question?: string } | null)?.question ?? ''
@@ -61,22 +67,23 @@ export function ReadingSessionPage() {
 
   const narrative = useMemo(() => {
     if (!spread || phase !== 'complete' || drawn.length === 0) return null
-    return generarLectura(spread, question, drawn)
-  }, [spread, phase, drawn, question])
+    return localizeVisibleNarrative(generarLectura(spread, question, drawn), drawn, language)
+  }, [spread, phase, drawn, question, language])
 
   if (!spread) {
     return (
       <Section className="py-24 text-center">
-        <p className="font-display text-2xl text-ivory">Esta tirada no existe.</p>
+        <p className="font-display text-2xl text-ivory">{t.missingSpread}</p>
         <div className="mt-6">
           <Link to="/lecturas">
-            <Button variant="secondary">Ver lecturas disponibles</Button>
+            <Button variant="secondary">{t.seeReadings}</Button>
           </Link>
         </div>
       </Section>
     )
   }
 
+  const view = localizeSpread(spread, language)
   const canStart = !spread.requiresQuestion || question.trim().length > 2
   const isClock = spread.layout === 'reloj'
   const fannedCount = Math.max(14, spread.cardCount + 6)
@@ -126,7 +133,7 @@ export function ReadingSessionPage() {
     return {
       id: createReadingId(),
       spreadId: spread!.id,
-      spreadTitle: spread!.title,
+      spreadTitle: localizeSpread(spread!, language).title,
       question: question.trim(),
       cards: drawn,
       createdAt: new Date().toISOString(),
@@ -139,25 +146,25 @@ export function ReadingSessionPage() {
     const result = buildResult()
     saveReading(result)
     setSaved(true)
-    setToast('Lectura guardada en tu diario')
+    setToast(t.toastSaved)
   }
 
   async function handleShare() {
     const result = buildResult()
-    const outcome = await shareReading(result)
+    const outcome = await shareReading(result, language)
     setToast(
       outcome === 'shared'
-        ? 'Lectura compartida'
+        ? t.toastShared
         : outcome === 'copied'
-          ? 'Lectura copiada al portapapeles'
-          : 'Lectura descargada',
+          ? t.toastCopied
+          : t.toastDownloaded,
     )
   }
 
   function handleDownload() {
     const result = buildResult()
-    downloadText(formatReadingAsText(result), `lectura-apus-${result.id}.txt`)
-    setToast('Archivo descargado')
+    downloadText(formatReadingAsText(result, language), `lectura-apus-${result.id}.txt`)
+    setToast(t.toastFile)
   }
 
   const revealedCount = drawn.filter((d) => d.revealed).length
@@ -167,10 +174,10 @@ export function ReadingSessionPage() {
     <Section className="py-10 sm:py-14">
       <div className="mb-8 text-center">
         <p className="text-[10px] uppercase tracking-[0.3em] text-gold/70">
-          {spread.subtitle}
+          {view.subtitle}
         </p>
         <h1 className="mt-2 font-display text-3xl text-ivory sm:text-4xl">
-          {spread.title}
+          {view.title}
         </h1>
       </div>
 
@@ -181,7 +188,7 @@ export function ReadingSessionPage() {
             htmlFor="pregunta"
             className="text-[11px] uppercase tracking-[0.2em] text-cyan-soft/80"
           >
-            {spread.requiresQuestion ? 'Tu pregunta' : 'Tu intención (opcional)'}
+            {spread.requiresQuestion ? t.yourQuestion : t.yourIntention}
           </label>
           <textarea
             id="pregunta"
@@ -193,32 +200,29 @@ export function ReadingSessionPage() {
             }}
             maxLength={LIMITE_PREGUNTA}
             rows={3}
-            placeholder="Escribe aquí lo que deseas consultar…"
+            placeholder={t.questionPlaceholder}
             className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-night/70 p-3.5 text-sm text-ivory outline-none transition placeholder:text-mist/40 focus:border-cyan-soft/50"
           />
-          <p className="mt-2 text-xs text-mist/50">
-            Formula tu pregunta en presente y con apertura. Las lecturas son
-            orientativas.
-          </p>
+          <p className="mt-2 text-xs text-mist/50">{t.questionHint}</p>
           <div className="mt-5 flex flex-wrap gap-3">
             <Button onClick={startShuffle} disabled={!canStart}>
-              Barajar las cartas
+              {t.shuffle}
             </Button>
             <Button variant="ghost" onClick={() => navigate('/lecturas')}>
-              Cambiar tirada
+              {t.changeSpread}
             </Button>
           </div>
           {showSpreadRecommendation && requiereTiradaAccion(spread.id, question) && (
-            <div role="dialog" aria-label="Recomendación de tirada" className="mt-5 rounded-xl border border-gold/25 bg-night/50 p-4">
+            <div role="dialog" aria-label={t.recommendAria} className="mt-5 rounded-xl border border-gold/25 bg-night/50 p-4">
               <p className="text-sm leading-relaxed text-ivory">
-                Tu pregunta busca conocer la acción de otra persona. Para responderla con mayor claridad te recomendamos la Lectura de acción de 3 cartas.
+                {t.recommendAction}
               </p>
               <div className="mt-4 flex flex-wrap gap-3">
                 <Button
                   variant="gold"
                   onClick={() => navigate('/lecturas/accion-tres', { state: { question: question.trim() } })}
                 >
-                  Usar tirada recomendada
+                  {t.useRecommended}
                 </Button>
                 <Button
                   variant="secondary"
@@ -230,7 +234,7 @@ export function ReadingSessionPage() {
                     setTimeout(() => setPhase('selecting'), 1100)
                   }}
                 >
-                  Continuar con una carta
+                  {t.continueOne}
                 </Button>
               </div>
             </div>
@@ -243,8 +247,11 @@ export function ReadingSessionPage() {
         <div className="text-center">
           <p className="font-display text-lg text-mist/85">
             {phase === 'shuffling'
-              ? 'Los apus barajan el mazo…'
-              : `Elige ${spread.cardCount} ${spread.cardCount === 1 ? 'carta' : 'cartas'} (${pickedSlots.length}/${spread.cardCount})`}
+              ? t.shuffling
+              : t.chooseCards
+                  .replaceAll('{n}', String(spread.cardCount))
+                  .replace('{unit}', spread.cardCount === 1 ? t.card : t.cards)
+                  .replace('{picked}', String(pickedSlots.length))}
           </p>
 
           <div className="mt-10 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
@@ -273,7 +280,7 @@ export function ReadingSessionPage() {
           {phase === 'selecting' && (
             <div className="mt-8">
               <Button variant="ghost" onClick={reset}>
-                Volver a empezar
+                {t.startOver}
               </Button>
             </div>
           )}
@@ -291,9 +298,7 @@ export function ReadingSessionPage() {
 
           {phase === 'revealing' && (
             <p className="mb-6 text-center text-sm text-cyan-soft/80">
-              {isClock
-                ? 'Voltea las cartas en sentido horario, empezando por la hora 1.'
-                : 'Voltea las cartas en orden, de la primera a la última.'}
+              {isClock ? t.flipClock : spread.layout === 'cruz' ? t.flipCross : t.flipOrder}
             </p>
           )}
 
@@ -302,7 +307,7 @@ export function ReadingSessionPage() {
             <div className="relative mx-auto aspect-square w-full max-w-[420px] sm:max-w-[560px] md:max-w-[660px]">
               <div className="pointer-events-none absolute inset-[12%] rounded-full border border-cyan-soft/15" />
               <p className="pointer-events-none absolute left-1/2 top-1/2 w-32 -translate-x-1/2 -translate-y-1/2 text-center font-display text-xs italic text-mist/50 sm:text-sm">
-                El reloj de las sombras
+                {t.clockName}
               </p>
               {drawn.map((d, i) => {
                 const pos = clockPosition(i, drawn.length)
@@ -338,6 +343,17 @@ export function ReadingSessionPage() {
                 )
               })}
             </div>
+          ) : spread.layout === 'cruz' ? (
+            <div className="mx-auto grid max-w-[690px] grid-cols-3 items-center justify-items-center gap-x-1 gap-y-5 sm:gap-x-4">
+              {drawn.map((d, i) => {
+                const isNext = i === nextToReveal
+                const placement = ['col-start-2 row-start-1', 'col-start-1 row-start-2', 'col-start-2 row-start-2', 'col-start-3 row-start-2', 'col-start-2 row-start-3'][i]
+                return <div key={d.position.id} className={`animate-reveal flex min-w-0 flex-col items-center ${placement}`} style={{ animationDelay: `${i * 0.1}s` }}>
+                  <span className={`mb-1 text-[10px] tracking-[0.2em] ${isNext && !d.revealed ? 'text-cyan-soft' : 'text-gold/60'}`}>{i + 1}</span>
+                  <TarotCard card={d.card} faceDown revealed={d.revealed} reversed={d.reversed} size="sm" label={positionLabel(spread, d.position.id, language)} onClick={d.revealed || !isNext ? undefined : () => revealCard(i)} />
+                </div>
+              })}
+            </div>
           ) : (
             <div className="flex flex-wrap items-start justify-center gap-x-4 gap-y-6 sm:gap-x-6">
               {drawn.map((d, i) => {
@@ -361,14 +377,14 @@ export function ReadingSessionPage() {
                       revealed={d.revealed}
                       reversed={d.reversed}
                       size={drawn.length > 3 ? 'md' : 'lg'}
-                      label={d.position.label}
+                      label={positionLabel(spread, d.position.id, language)}
                       onClick={
                         d.revealed || !isNext ? undefined : () => revealCard(i)
                       }
                     />
                     {!d.revealed && isNext && (
                       <p className="mt-2 text-center text-[11px] text-cyan-soft/70">
-                        Toca para voltear
+                        {t.tapToFlip}
                       </p>
                     )}
                   </div>
@@ -380,7 +396,7 @@ export function ReadingSessionPage() {
           {phase === 'revealing' && revealedCount < drawn.length && (
             <div className="mt-8 text-center">
               <Button variant="secondary" onClick={revealAll}>
-                Voltear todas
+                {t.flipAll}
               </Button>
             </div>
           )}
@@ -397,9 +413,7 @@ export function ReadingSessionPage() {
                   aria-expanded={showDetails}
                   className="mx-auto flex items-center gap-2 rounded-full border border-white/10 px-4 py-2 text-sm text-mist transition hover:border-cyan-soft/40 hover:text-ivory"
                 >
-                  {showDetails
-                    ? 'Ocultar el detalle de cada carta'
-                    : 'Ver el detalle de cada carta'}
+                  {showDetails ? t.hideDetails : t.showDetails}
                   <span
                     className={`transition-transform ${
                       showDetails ? 'rotate-180' : ''
@@ -413,7 +427,11 @@ export function ReadingSessionPage() {
                 {showDetails && (
                   <div className="animate-reveal mt-5 grid gap-4 md:grid-cols-2">
                     {drawn.map((d) => (
-                      <CardDetail key={d.position.id} drawn={d} />
+                      <CardDetail
+                        key={d.position.id}
+                        drawn={d}
+                        positionLabel={positionLabel(spread, d.position.id, language)}
+                      />
                     ))}
                   </div>
                 )}
@@ -423,15 +441,15 @@ export function ReadingSessionPage() {
 
           {phase === 'complete' && (
             <div className="mt-10 flex flex-wrap justify-center gap-3">
-              <Button onClick={reset}>Repetir la tirada</Button>
+              <Button onClick={reset}>{t.repeat}</Button>
               <Button variant="gold" onClick={handleSave} disabled={saved}>
-                {saved ? 'Guardada en tu diario' : 'Guardar lectura'}
+                {saved ? t.saved : t.save}
               </Button>
               <Button variant="secondary" onClick={handleShare}>
-                Compartir
+                {t.share}
               </Button>
               <Button variant="ghost" onClick={handleDownload}>
-                Descargar .txt
+                {t.download}
               </Button>
             </div>
           )}

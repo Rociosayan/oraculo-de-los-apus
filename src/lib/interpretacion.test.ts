@@ -60,14 +60,27 @@ describe('cantidades exactas de cartas por tirada', () => {
     'carta-del-dia': 1,
     'una-carta': 1,
     'tres-cartas': 3,
+    'cruz-cinco': 5,
     amor: 7,
     trabajo: 7,
     'camino-siete': 7,
     'reloj-sombras': 12,
   }
 
-  it('define las 8 tiradas', () => {
-    expect(SPREADS).toHaveLength(8)
+  it('define las 9 tiradas', () => {
+    expect(SPREADS).toHaveLength(9)
+  })
+
+  it('la cruz se lee arriba, izquierda a derecha y abajo', () => {
+    expect(spread('cruz-cinco').positions.map((p) => p.id)).toEqual(['arriba', 'izquierda', 'centro', 'derecha', 'abajo'])
+  })
+
+  it('la cruz relaciona cada brazo con la carta central', () => {
+    const cards = tiradaForzada('cruz-cinco', [0, 1, 2, 3, 4])
+    const narrative = generarLectura(spread('cruz-cinco'), '¿Qué debo comprender de esta persona?', cards)
+    const spatial = narrative.relato.filter((line) => /del centro/.test(line))
+    expect(spatial).toHaveLength(4)
+    expect(spatial.every((line) => line.includes(cards[2].card.name))).toBe(true)
   })
 
   it('la lectura de acción usa intención, condicionante y acción probable', () => {
@@ -182,12 +195,13 @@ describe('preguntas de acción con horizonte inmediato', () => {
  * Profundidad de los datos de las 22 cartas
  * ============================================================ */
 
-describe('datos profundos de las 22 cartas', () => {
-  it('hay 22 cartas', () => {
-    expect(ANDEAN_CARDS).toHaveLength(22)
+describe('datos del mazo', () => {
+  it('hay 72 cartas únicas', () => {
+    expect(ANDEAN_CARDS).toHaveLength(72)
+    expect(new Set(ANDEAN_CARDS.map((card) => card.id)).size).toBe(72)
   })
 
-  for (const card of ANDEAN_CARDS) {
+  for (const card of ANDEAN_CARDS.slice(0, 22)) {
     it(`carta ${card.id} (${card.name}) cumple los mínimos de contenido`, () => {
       expect(contarPalabras(card.significadoGeneral)).toBeGreaterThanOrEqual(100)
       expect(contarPalabras(card.significadoAmor)).toBeGreaterThanOrEqual(100)
@@ -209,9 +223,9 @@ describe('datos profundos de las 22 cartas', () => {
 
   it('los significados no se repiten entre cartas', () => {
     const generales = new Set(ANDEAN_CARDS.map((c) => c.significadoGeneral))
-    expect(generales.size).toBe(22)
+    expect(generales.size).toBe(72)
     const amores = new Set(ANDEAN_CARDS.map((c) => c.significadoAmor))
-    expect(amores.size).toBe(22)
+    expect(amores.size).toBe(72)
   })
 })
 

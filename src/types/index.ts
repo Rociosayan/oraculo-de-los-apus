@@ -156,6 +156,7 @@ export type SpreadId =
   | 'amor'
   | 'trabajo'
   | 'camino-siete'
+  | 'cruz-cinco'
   | 'reloj-sombras'
 
 /** La "lente" de una posición: qué dimensión de la carta lee el motor.
@@ -213,7 +214,7 @@ export interface SpreadDefinition {
   /** Si requiere pregunta obligatoria */
   requiresQuestion: boolean
   /** Disposición visual: fila/abanico o círculo de reloj */
-  layout: 'linea' | 'reloj'
+  layout: 'linea' | 'reloj' | 'cruz'
 }
 
 export interface DrawnCard {
@@ -262,6 +263,33 @@ export interface ReadingResult {
   /** Reserva para usuario autenticado */
   userId?: string | null
 }
+
+/* ============================================================
+ * Interpretación de la Maestra (IA, 7 bloques del método)
+ * ============================================================ */
+
+export type CardOrientation = 'upright' | 'reversed'
+
+export interface MaestraReadingRequest {
+  question: string
+  spreadType: string
+  cards: {
+    name: string
+    position: string
+    orientation: CardOrientation
+    arcanaRef?: string
+  }[]
+  language?: 'es' | 'en' | 'fr'
+  priorContext?: string
+}
+
+export interface MaestraNarrative {
+  oculto: string
+  respuesta: string
+  consejo: string
+}
+
+export type MaestraReadingStatus = 'idle' | 'loading' | 'success' | 'error'
 
 export type AppView =
   | 'inicio'

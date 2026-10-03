@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ANDEAN_CARDS } from '../data/cards'
-import { SPREADS } from '../data/spreads'
+import { localizedSpreads } from '../content/spreadsCopy'
 import { TarotCard } from '../components/cards/TarotCard'
 import { CeremonialScene } from '../components/atmosphere/CeremonialScene'
 import { Button } from '../components/ui/Button'
@@ -25,6 +25,7 @@ export function HomePage() {
         <Link to="/lecturas"><Button className="px-7 py-3 text-base">{t.start}</Button></Link>
         <Link to="/cartas"><Button variant="secondary" className="px-6 py-3">{t.explore}</Button></Link>
         <Link to="/tienda"><Button variant="gold" className="px-6 py-3">{t.shop}</Button></Link>
+        <Link to="/fortaleza"><Button variant="gold" className="border-gold/70 bg-night/60 px-6 py-3 shadow-[0_0_28px_rgba(201,169,98,.16)]">✦ {language === 'es' ? 'Entrar a la fortaleza' : language === 'fr' ? 'Entrer dans la forteresse' : 'Enter the fortress'}</Button></Link>
       </div>
     </section>
     <Section className="py-16 sm:py-20">
@@ -48,7 +49,7 @@ export function HomePage() {
     </Section>
     <Section className="py-12 pb-24 sm:py-16">
       <SectionTitle eyebrow={t.readings} title={t.readingsTitle} subtitle={t.readingsText} />
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{SPREADS.map((spread) => <Link key={spread.id} to={`/lecturas/${spread.id}`}><Panel className="h-full transition duration-300 hover:border-cyan-soft/40 hover:bg-indigo-soft/40"><p className="text-[10px] uppercase tracking-[0.25em] text-gold/70">{spread.subtitle}</p><h3 className="mt-2 font-display text-2xl text-ivory">{spread.title}</h3><p className="mt-2 text-sm leading-relaxed text-mist/70">{spread.description}</p><p className="mt-4 text-xs text-cyan-soft">{spread.cardCount} {spread.cardCount === 1 ? t.card : t.cards} →</p></Panel></Link>)}</div>
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{localizedSpreads(language).map((spread) => <Link key={spread.id} to={`/lecturas/${spread.id}`}><Panel className="h-full transition duration-300 hover:border-cyan-soft/40 hover:bg-indigo-soft/40"><p className="text-[10px] uppercase tracking-[0.25em] text-gold/70">{spread.subtitle}</p><h3 className="mt-2 font-display text-2xl text-ivory">{spread.title}</h3><p className="mt-2 text-sm leading-relaxed text-mist/70">{spread.description}</p><p className="mt-4 text-xs text-cyan-soft">{spread.cardCount} {spread.cardCount === 1 ? t.card : t.cards} →</p></Panel></Link>)}</div>
     </Section>
   </>
 }

@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useLanguage } from '../../context/LanguageContext'
+import { useCopy } from '../../content/translations'
 
 const PUBLIC_BASE = import.meta.env.BASE_URL
 const ASSET_VERSION = '20260812'
@@ -120,6 +122,8 @@ function SpeakerIcon({ muted }: { muted: boolean }) {
 }
 
 export function CeremonialScene({ className = '' }: { className?: string }) {
+  const { language } = useLanguage()
+  const t = useCopy(language)
   const [phase, setPhase] = useState<Phase>('idle')
   const [soundOn, setSoundOn] = useState(true)
   const [tremor, setTremor] = useState(false)
@@ -510,7 +514,7 @@ export function CeremonialScene({ className = '' }: { className?: string }) {
           <button
             type="button"
             onClick={startCeremony}
-            aria-label="Tocar al paqo para que llame a los apus"
+            aria-label={t.tapPaqo}
             className="absolute bottom-0 left-1/2 z-20 h-[75%] w-[min(60%,420px)] -translate-x-1/2 cursor-pointer rounded-t-[45%] transition-transform duration-500 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-soft/70 active:scale-[1.015]"
           />
         )}
@@ -518,7 +522,7 @@ export function CeremonialScene({ className = '' }: { className?: string }) {
         {/* Texto guía en reposo */}
         {phase === 'idle' && (
           <p className="pointer-events-none absolute inset-x-0 bottom-4 z-20 text-center text-[11px] uppercase tracking-[0.35em] text-cyan-soft/75">
-            Toca al paqo para que llame a los apus
+            {t.tapPaqo}
           </p>
         )}
 
@@ -529,14 +533,13 @@ export function CeremonialScene({ className = '' }: { className?: string }) {
               className="animate-emerge font-display text-2xl italic text-ivory sm:text-4xl"
               style={{ textShadow: '0 0 24px rgba(103,232,249,0.35)' }}
             >
-              Es hora de que los Apus te hablen.
+              {t.apusSpeak}
             </h2>
             <p
               className="animate-emerge mx-auto max-w-xl text-sm leading-relaxed text-mist/90 sm:text-base"
               style={{ animationDelay: '0.9s' }}
             >
-              Respira profundamente, formula tu pregunta y permite que la
-              sabiduría de las montañas encuentre el camino hacia ti.
+              {t.apusSpeakText}
             </p>
             <div
               className="animate-emerge"
@@ -546,7 +549,7 @@ export function CeremonialScene({ className = '' }: { className?: string }) {
                 to="/lecturas"
                 className="animate-glow-breathe inline-block rounded-full border border-cyan-soft/50 bg-gradient-to-r from-electric/30 via-cyan-glow/25 to-gold/25 px-7 py-3 font-medium text-ivory backdrop-blur-sm transition hover:border-gold/60"
               >
-                Escuchar el mensaje de los Apus
+                {t.listenApus}
               </Link>
             </div>
           </div>
@@ -557,7 +560,7 @@ export function CeremonialScene({ className = '' }: { className?: string }) {
           type="button"
           onClick={() => setSoundOn((v) => !v)}
           aria-pressed={soundOn}
-          aria-label={soundOn ? 'Silenciar el sonido' : 'Activar el sonido'}
+          aria-label={soundOn ? t.muteSound : t.unmuteSound}
           className="absolute right-3 top-3 z-30 rounded-full border border-white/15 bg-night/60 p-2 text-mist/80 backdrop-blur-sm transition hover:border-cyan-soft/40 hover:text-cyan-soft"
         >
           <SpeakerIcon muted={!soundOn} />

@@ -292,3 +292,65 @@
     animation-duration: 0.01s;
   }
 }
+
+/* ==== Fortaleza de los Apus ==== */
+
+.fortress-vignette {
+  background:
+    radial-gradient(circle at 50% 54%, transparent 22%, rgba(2, 5, 13, 0.16) 57%, rgba(2, 5, 13, 0.72) 100%),
+    linear-gradient(90deg, rgba(2, 5, 13, 0.38), transparent 25%, transparent 75%, rgba(2, 5, 13, 0.38));
+}
+
+.fortress-intro {
+  animation: fortress-intro 1.2s ease-out both;
+  text-shadow: 0 3px 28px rgba(2, 5, 13, 0.9);
+}
+
+.fortress-enter {
+  box-shadow: 0 0 0 1px rgba(232, 213, 163, 0.08), 0 0 42px rgba(201, 169, 98, 0.2);
+}
+
+.fortress-enter:hover {
+  box-shadow: 0 0 0 1px rgba(232, 213, 163, 0.16), 0 0 58px rgba(201, 169, 98, 0.34);
+}
+
+.fortress-hotspot {
+  animation: fortress-beacon 2.8s ease-in-out infinite;
+}
+
+.animate-fortress-reveal {
+  animation: fortress-reveal 1.35s ease-out both;
+}
+
+.animate-fortress-panel {
+  animation: fortress-panel 0.35s ease-out both;
+}
+
+@keyframes fortress-intro {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fortress-reveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fortress-panel {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fortress-beacon {
+  0%, 100% { box-shadow: 0 0 0 7px rgba(201, 169, 98, 0.08), 0 0 24px rgba(232, 213, 163, 0.45); }
+  50% { box-shadow: 0 0 0 12px rgba(201, 169, 98, 0.02), 0 0 42px rgba(232, 213, 163, 0.82); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fortress-intro,
+  .fortress-hotspot,
+  .animate-fortress-reveal,
+  .animate-fortress-panel {
+    animation: none;
+  }
+}

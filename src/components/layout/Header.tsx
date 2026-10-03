@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { NavLink, Link } from 'react-router-dom'
+import { NavLink, Link, useLocation } from 'react-router-dom'
+import { useStoreCart } from '../../hooks/useStoreCart'
 import { ChakanaMark } from '../atmosphere/CosmicBackground'
 import { useLanguage, type Language } from '../../context/LanguageContext'
 import { useCopy } from '../../content/translations'
@@ -12,6 +13,8 @@ const routes = [
 export function Header() {
   const [open, setOpen] = useState(false)
   const { language, setLanguage } = useLanguage()
+  const { count } = useStoreCart()
+  const inStore = useLocation().pathname.startsWith('/tienda')
   const t = useCopy(language)
 
   const languagePicker = (compact = false) => (
@@ -40,7 +43,8 @@ export function Header() {
             </NavLink>
           ))}
         </nav>
-        <div className="hidden items-center gap-3 sm:flex">{languagePicker()}</div>
+        <div className="hidden items-center gap-3 sm:flex">{inStore && <Link to="/tienda/carrito" className="rounded-full border border-gold/35 px-3 py-1.5 text-sm text-gold-soft">{language === 'es' ? 'Carrito' : language === 'fr' ? 'Panier' : 'Cart'} ({count})</Link>}{languagePicker()}</div>
+        {inStore && <Link to="/tienda/carrito" className="rounded-full border border-gold/35 px-3 py-1.5 text-xs text-gold-soft sm:hidden">{language === 'es' ? 'Carrito' : language === 'fr' ? 'Panier' : 'Cart'} ({count})</Link>}
         <button type="button" className="rounded-lg border border-white/10 p-2 text-mist xl:hidden" aria-expanded={open} aria-label="Menu" onClick={() => setOpen((v) => !v)}>
           <span className="mb-1 block h-0.5 w-5 bg-current" /><span className="mb-1 block h-0.5 w-5 bg-current" /><span className="block h-0.5 w-5 bg-current" />
         </button>

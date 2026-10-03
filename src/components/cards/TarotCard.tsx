@@ -2,6 +2,8 @@ import { useState } from 'react'
 import type { AndeanCard } from '../../types'
 import { CardMotifSvg } from './CardMotifSvg'
 import { CARD_BACK_SRC, cardImageSrc } from '../../data/cardImages'
+import { useLanguage } from '../../context/LanguageContext'
+import { useCopy } from '../../content/translations'
 
 interface TarotCardProps {
   card?: AndeanCard
@@ -69,6 +71,8 @@ export function TarotCard({
   label,
   className = '',
 }: TarotCardProps) {
+  const { language } = useLanguage()
+  const t = useCopy(language)
   const showFront = revealed || !faceDown
   const [frontError, setFrontError] = useState(false)
   const [backError, setBackError] = useState(false)
@@ -141,13 +145,14 @@ export function TarotCard({
                     }`}
                   />
                 ) : (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-3 text-center">
-                    <p className="text-[9px] leading-snug text-mist/60">
-                      Ilustración pendiente
-                    </p>
-                    <p className="break-all text-[8px] text-mist/40">
-                      {frontSrc}
-                    </p>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[radial-gradient(circle_at_center,#254268_0%,#0b1229_62%,#050914_100%)] p-3 text-center">
+                    <div className="absolute inset-5 rounded-[50%] border border-gold/25" />
+                    <div className="absolute inset-9 rounded-[50%] border border-cyan-soft/15" />
+                    <span className="font-display text-3xl text-gold-soft/80 sm:text-5xl">✦</span>
+                    <div className="relative h-12 w-12 text-cyan-soft/70 sm:h-16 sm:w-16">
+                      <CardMotifSvg motif={card.motif} />
+                    </div>
+                    <p className="relative max-w-[12rem] font-display text-sm text-ivory/90 sm:text-lg">{card.symbol}</p>
                   </div>
                 )}
 
@@ -188,7 +193,7 @@ export function TarotCard({
                   </p>
                   {reversed && (
                     <span className="mt-1 rounded-full border border-electric/40 bg-night/60 px-2 py-0.5 text-[8px] tracking-wider text-electric-bright uppercase">
-                      Invertida
+                      {t.reversed}
                     </span>
                   )}
                 </div>

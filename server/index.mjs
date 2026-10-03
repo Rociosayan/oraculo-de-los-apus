@@ -1,6 +1,7 @@
 import { createServer } from 'node:http'
 import { createReadStream, existsSync, statSync } from 'node:fs'
 import { extname, join, normalize } from 'node:path'
+import { handleApi } from './api.mjs'
 
 const port = Number(process.env.PORT ?? 8787)
 const dist = join(process.cwd(), 'dist')
@@ -31,8 +32,7 @@ function serveStatic(req, res) {
 
 const server = createServer((req, res) => {
   if (new URL(req.url, 'http://localhost').pathname.startsWith('/api/')) {
-    res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' })
-    return res.end(JSON.stringify({ error: 'NOT_FOUND' }))
+    return handleApi(req, res)
   }
   serveStatic(req, res)
 })

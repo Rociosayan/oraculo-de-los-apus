@@ -2,6 +2,7 @@ import type { AndeanCard, CardDepth, CardMotif } from '../types'
 import { PROFUNDIDAD_1 } from './profundidad-1'
 import { PROFUNDIDAD_2 } from './profundidad-2'
 import { PROFUNDIDAD_3 } from './profundidad-3'
+import { EXPANDED_CARDS } from './expandedCards'
 
 interface BaseCard {
   id: number
@@ -425,7 +426,7 @@ const PROFUNDIDAD: Record<number, CardDepth> = {
 }
 
 /** Cartas completas: base + significados profundos por contexto. */
-export const ANDEAN_CARDS: AndeanCard[] = BASE_CARDS.map((base) => {
+const MAJOR_CARDS: AndeanCard[] = BASE_CARDS.map((base) => {
   const depth = PROFUNDIDAD[base.id]
   return {
     ...base,
@@ -434,6 +435,8 @@ export const ANDEAN_CARDS: AndeanCard[] = BASE_CARDS.map((base) => {
     arcanaRef: depth.correspondenciaArcano,
   }
 })
+
+export const ANDEAN_CARDS: AndeanCard[] = [...MAJOR_CARDS, ...EXPANDED_CARDS]
 
 export function getCardById(id: number): AndeanCard | undefined {
   return ANDEAN_CARDS.find((c) => c.id === id)

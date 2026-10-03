@@ -1,8 +1,24 @@
 import type { SpreadDefinition } from '../types'
 
-/** Las ocho tiradas del oráculo. El motor de interpretación usa la lente (`lens`)
+/** Las nueve tiradas del oráculo. El motor de interpretación usa la lente (`lens`)
  *  de cada posición para leer la carta según el lugar que ocupa. */
 export const SPREADS: SpreadDefinition[] = [
+  {
+    id: 'cruz-cinco',
+    title: 'Cruz de cinco cartas',
+    subtitle: 'Lectura de una persona o situación',
+    description: 'Una carta arriba, tres de izquierda a derecha y una abajo. Los significados de cada lugar son provisionales hasta incorporar el método de la autora.',
+    cardCount: 5,
+    requiresQuestion: true,
+    layout: 'cruz',
+    positions: [
+      { id: 'arriba', label: 'Arriba · lo visible', description: 'Lo que se manifiesta', lens: 'mostrado' },
+      { id: 'izquierda', label: 'Izquierda · antecedente', description: 'Lo que llega a esta situación', lens: 'origen' },
+      { id: 'centro', label: 'Centro · núcleo', description: 'La persona o situación central', lens: 'persona' },
+      { id: 'derecha', label: 'Derecha · tendencia', description: 'Lo que se desarrolla', lens: 'tendencia' },
+      { id: 'abajo', label: 'Abajo · raíz', description: 'Lo que sostiene el asunto', lens: 'origen-oculto' },
+    ],
+  },
   {
     id: 'carta-del-dia',
     title: 'Carta del día',

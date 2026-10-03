@@ -1146,6 +1146,8 @@ export function generarLectura(
   const marco =
     cards.length === 1
       ? 'con una sola carta, que concentra todo el mensaje'
+      : spread.layout === 'cruz'
+        ? 'con cinco cartas en cruz: arriba, la fila central de izquierda a derecha y abajo; el centro se relaciona con cada brazo de la cruz'
       : cards.length === 12
         ? 'con doce cartas dispuestas en círculo, como las horas de un reloj que se recorre en sentido horario hasta cerrar en la síntesis'
         : `con ${cards.length} cartas que se leen encadenadas: cada una modifica, amplía o contradice a la anterior hasta formar una sola historia`
@@ -1159,6 +1161,10 @@ export function generarLectura(
   const chunk = cards.length >= 12 ? 3 : cards.length >= 5 ? 2 : 1
   let parrafo: string[] = []
   cards.forEach((d, i) => {
+    if (spread.layout === 'cruz') {
+      relato.push(oracionDePosicion(d, rng, tema))
+      return
+    }
     if (i > 0) {
       const rel = relacionEntre(cards[i - 1], d)
       parrafo.push(pick(rng, CONECTORES[rel]))
@@ -1171,9 +1177,22 @@ export function generarLectura(
   })
 
   // 3) Análisis global: refuerzos, contradicciones, progresión, símbolos
-  const relaciones = parrafoRelaciones(cards, rng)
+  if (spread.layout === 'cruz' && cards.length === 5) {
+    const centro = cards[2]
+    const vinculos: [DrawnCard, string][] = [
+      [cards[1], 'A la izquierda del centro'],
+      [cards[3], 'A la derecha del centro'],
+      [cards[0], 'Por encima del centro'],
+      [cards[4], 'Debajo del centro'],
+    ]
+    for (const [brazo, lugar] of vinculos) {
+      const relacion = relacionEntre(centro, brazo)
+      relato.push(`${lugar}, ${brazo.card.name} ${relacion === 'refuerza' ? 'refuerza' : relacion === 'contradice' ? 'contradice' : 'matiza'} lo que expresa ${centro.card.name}.`)
+    }
+  }
+  const relaciones = spread.layout === 'cruz' ? null : parrafoRelaciones(cards, rng)
   if (relaciones) relato.push(relaciones)
-  const progresion = parrafoProgresion(cards, rng)
+  const progresion = spread.layout === 'cruz' ? null : parrafoProgresion(cards, rng)
   if (progresion) relato.push(progresion)
   const simbolos = parrafoSimbolos(cards, rng)
   if (simbolos) relato.push(simbolos)
@@ -1207,17 +1226,22 @@ export function generarLectura(
 }
 
 /** Versión de texto plano para descargar o compartir. */
-export function narrativaToText(n: ReadingNarrative): string {
+export function narrativaToText(
+  n: ReadingNarrative,
+  labels: { question: string; hidden: string; answer: string; advice: string } = {
+    question: 'Pregunta',
+    hidden: 'LO QUE PERMANECE OCULTO',
+    answer: 'LA RESPUESTA MÁS CLARA',
+    advice: 'CONSEJO DE LOS APUS',
+  },
+): string {
   const partes = [
-    n.titulo.toUpperCase(),
-    n.pregunta ? `Pregunta: ${n.pregunta}` : '',
-    'EL RELATO DE LA TIRADA',
-    ...n.relato,
-    'LO QUE PERMANECE OCULTO',
+    n.pregunta ? `${labels.question}: ${n.pregunta}` : '',
+    labels.hidden.toUpperCase(),
     n.oculto,
-    'LA RESPUESTA MÁS CLARA',
+    labels.answer.toUpperCase(),
     n.respuesta,
-    'CONSEJO DE LOS APUS',
+    labels.advice.toUpperCase(),
     n.consejo,
     n.advertencia,
   ]

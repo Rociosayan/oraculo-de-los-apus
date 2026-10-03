@@ -10,11 +10,18 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | null>(null)
 
+function initialLanguage(): Language {
+  const saved = localStorage.getItem('apus-language')
+  if (saved === 'es' || saved === 'en' || saved === 'fr') return saved
+  for (const locale of navigator.languages ?? [navigator.language]) {
+    const code = locale.toLowerCase().split('-')[0]
+    if (code === 'es' || code === 'en' || code === 'fr') return code
+  }
+  return 'es'
+}
+
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>(() => {
-    const saved = localStorage.getItem('apus-language')
-    return saved === 'en' || saved === 'fr' ? saved : 'es'
-  })
+  const [language, setLanguage] = useState<Language>(initialLanguage)
 
   useEffect(() => {
     localStorage.setItem('apus-language', language)

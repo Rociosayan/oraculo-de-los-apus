@@ -27,8 +27,9 @@ export const CARD_IMAGE_SLUGS: Record<number, string> = {
   21: 'chakana',
 }
 
-export function cardImageSrc(id: number): string {
+export function cardImageSrc(id: number): string | undefined {
   const slug = CARD_IMAGE_SLUGS[id]
+  if (!slug) return undefined
   return `${import.meta.env.BASE_URL}images/cartas/${String(id).padStart(2, '0')}-${slug}.webp?v=20260812`
 }
 

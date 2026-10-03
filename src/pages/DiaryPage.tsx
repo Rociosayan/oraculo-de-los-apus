@@ -4,26 +4,28 @@ import { downloadText, formatReadingAsText, shareReading } from '../lib/diary'
 import { Button } from '../components/ui/Button'
 import { Panel, Section, SectionTitle } from '../components/ui/Section'
 import { CardMotifSvg } from '../components/cards/CardMotifSvg'
+import { useLanguage } from '../context/LanguageContext'
+import { useCopy } from '../content/translations'
 
 export function DiaryPage() {
   const { entries, deleteReading } = useDiary()
+  const { language } = useLanguage()
+  const t = useCopy(language)
 
   return (
     <Section className="py-12 sm:py-16">
       <SectionTitle
-        eyebrow="Tu registro"
-        title="Mi diario"
-        subtitle="Las lecturas que guardas permanecen en este dispositivo. Podrás sincronizarlas cuando actives tu cuenta."
+        eyebrow={t.diaryEyebrow}
+        title={t.diaryTitle}
+        subtitle={t.diaryText}
       />
 
       {entries.length === 0 ? (
         <Panel className="mx-auto mt-10 max-w-lg text-center">
-          <p className="text-sm text-mist/75">
-            Aún no has guardado ninguna lectura.
-          </p>
+          <p className="text-sm text-mist/75">{t.diaryEmpty}</p>
           <div className="mt-5">
             <Link to="/lecturas">
-              <Button>Iniciar una lectura</Button>
+              <Button>{t.start}</Button>
             </Link>
           </div>
         </Panel>
@@ -34,7 +36,7 @@ export function DiaryPage() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-[10px] uppercase tracking-[0.25em] text-gold/70">
-                    {new Date(entry.createdAt).toLocaleString('es-ES', {
+                    {new Date(entry.createdAt).toLocaleString(language === 'en' ? 'en-US' : language === 'fr' ? 'fr-FR' : 'es-ES', {
                       dateStyle: 'long',
                       timeStyle: 'short',
                     })}
@@ -51,29 +53,29 @@ export function DiaryPage() {
                 <div className="flex gap-2">
                   <button
                     type="button"
-                    onClick={() => shareReading(entry)}
+                    onClick={() => shareReading(entry, language)}
                     className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-mist transition hover:bg-white/5"
                   >
-                    Compartir
+                    {t.share}
                   </button>
                   <button
                     type="button"
                     onClick={() =>
                       downloadText(
-                        formatReadingAsText(entry),
+                        formatReadingAsText(entry, language),
                         `lectura-apus-${entry.id}.txt`,
                       )
                     }
                     className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-mist transition hover:bg-white/5"
                   >
-                    Descargar
+                    {t.download}
                   </button>
                   <button
                     type="button"
                     onClick={() => deleteReading(entry.id)}
                     className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-mist/70 transition hover:border-electric/40 hover:text-electric-bright"
                   >
-                    Eliminar
+                    {t.delete}
                   </button>
                 </div>
               </div>
@@ -105,7 +107,7 @@ export function DiaryPage() {
                       <p className="truncate text-sm text-ivory">{d.card.name}</p>
                       {d.reversed && (
                         <p className="text-[10px] text-electric-bright/80">
-                          Invertida
+                          {t.reversed}
                         </p>
                       )}
                     </div>

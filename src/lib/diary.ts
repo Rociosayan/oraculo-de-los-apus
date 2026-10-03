@@ -1,7 +1,22 @@
+import type { Language } from '../context/LanguageContext'
+import { copy } from '../content/translations'
+import { localizedCardFields } from '../content/cardCopy'
 import type { ReadingResult } from '../types'
 import { narrativaToText } from './interpretacion'
 
 const STORAGE_KEY = 'oraculo-apus-diario-v2'
+
+const localeTag: Record<Language, string> = {
+  es: 'es-ES',
+  en: 'en-US',
+  fr: 'fr-FR',
+}
+
+const fileHead: Record<Language, { date: string; spread: string; cards: string; card: string; andean: string }> = {
+  es: { date: 'Fecha', spread: 'Tirada', cards: 'CARTAS Y POSICIONES', card: 'Carta', andean: 'Mensaje andino' },
+  en: { date: 'Date', spread: 'Spread', cards: 'CARDS AND POSITIONS', card: 'Card', andean: 'Andean message' },
+  fr: { date: 'Date', spread: 'Tirage', cards: 'CARTES ET POSITIONS', card: 'Carte', andean: 'Message andin' },
+}
 
 /** Persistencia local — lista para migrar a base de datos / usuario autenticado */
 export function loadDiary(): ReadingResult[] {
@@ -10,7 +25,6 @@ export function loadDiary(): ReadingResult[] {
     if (!raw) return []
     const parsed = JSON.parse(raw) as ReadingResult[]
     if (!Array.isArray(parsed)) return []
-    // Descarta lecturas guardadas con un formato anterior
     return parsed.filter((e) => e && Array.isArray(e.cards) && e.narrative)
   } catch {
     return []
@@ -34,35 +48,47 @@ export function removeDiaryEntry(id: string): ReadingResult[] {
   return next
 }
 
-export function formatReadingAsText(entry: ReadingResult): string {
-  const date = new Date(entry.createdAt).toLocaleString('es-ES', {
+export function formatReadingAsText(entry: ReadingResult, language: Language = 'es'): string {
+  const t = copy[language]
+  const head = fileHead[language]
+  const date = new Date(entry.createdAt).toLocaleString(localeTag[language], {
     dateStyle: 'long',
     timeStyle: 'short',
   })
-  let text = `ORÁCULO DE LOS APUS\n${'='.repeat(28)}\n\n`
-  text += `Fecha: ${date}\n`
-  text += `Tirada: ${entry.spreadTitle}\n\n`
+  let text = `${t.heroTitle.toUpperCase()}\n${'='.repeat(28)}\n\n`
+  text += `${head.date}: ${date}\n`
+  text += `${head.spread}: ${entry.spreadTitle}\n\n`
 
-  text += `${narrativaToText(entry.narrative)}\n\n`
+  text += `${narrativaToText(entry.narrative, {
+    question: language === 'en' ? 'Question' : language === 'fr' ? 'Question' : 'Pregunta',
+    hidden: t.hidden,
+    answer: t.clearAnswer,
+    advice: t.advice,
+  })}\n\n`
 
-  text += `CARTAS Y POSICIONES\n${'-'.repeat(28)}\n`
+  text += `${head.cards}\n${'-'.repeat(28)}\n`
   entry.cards.forEach((d, i) => {
-    const orient = d.reversed ? 'Invertida' : 'Al derecho'
-    text += `\nCarta ${i + 1} — ${d.position.label}\n`
+    const loc = localizedCardFields(d.card, language)
+    const orient = d.reversed ? t.reversed : t.upright
+    text += `\n${head.card} ${i + 1} — ${d.position.label}\n`
     text += `${d.card.name} (${d.card.symbol}) — ${orient}\n`
-    text += `Mensaje andino: ${d.card.andeanMessage}\n`
+    text += `${head.andean}: ${loc.andeanMessage}\n`
   })
   text += '\n'
 
   return text
 }
 
-export async function shareReading(entry: ReadingResult): Promise<'shared' | 'copied' | 'downloaded'> {
-  const text = formatReadingAsText(entry)
+export async function shareReading(
+  entry: ReadingResult,
+  language: Language = 'es',
+): Promise<'shared' | 'copied' | 'downloaded'> {
+  const text = formatReadingAsText(entry, language)
+  const t = copy[language]
   if (navigator.share) {
     try {
       await navigator.share({
-        title: 'Oráculo de los Apus',
+        title: t.heroTitle,
         text,
       })
       return 'shared'
