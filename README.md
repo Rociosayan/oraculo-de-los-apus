@@ -4,6 +4,8 @@
 
 El mazo reúne los 22 arcanos mayores existentes y 50 cartas originales en cinco caminos: Tierra, Agua, Fuego, Aire y Comunidad. Las nuevas cartas ya participan en las tiradas y aparecen en `/#/cartas`, con filtros por camino, significado al derecho, sombra y consejo. Sus ilustraciones son gráficas simbólicas provisionales. Los textos de las 50 cartas son una primera edición editorial y deben revisarse con el método de lectura de la autora; no se presentan como significados tradicionales documentados. Las traducciones detalladas de estas 50 cartas también están pendientes.
 
+**Pendiente prioritario:** crear y revisar las 50 imágenes individuales antes de considerar terminado el mazo. La lista completa por carta está en [`docs/pendientes-ilustraciones.md`](docs/pendientes-ilustraciones.md).
+
 ## Interpretaciones locales
 
 La aplicación genera la lectura gratuita en el dispositivo mediante el método Pilar.
